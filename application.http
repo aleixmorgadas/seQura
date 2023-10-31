@@ -1,0 +1,11 @@
+POST http://localhost:8080/orders
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="file"; filename="order.csv";
+Content-Type: text/csv
+
+< ./src/test/resources/csv/orders.csv
+--boundary--
+
+###
