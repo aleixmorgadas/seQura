@@ -16,5 +16,5 @@ public class Merchant {
     String email;
     String liveOn;
     String disbursementFrequency;
-    float minimumMonthlyFee;
+    double minimumMonthlyFee;
 }

@@ -38,7 +38,7 @@ public class MerchantController {
                         .email(record.get(Header.Email))
                         .liveOn(record.get(Header.LiveOn))
                         .disbursementFrequency(record.get(Header.DisbursementFrequency))
-                        .minimumMonthlyFee(Float.parseFloat(record.get(Header.MinimumMonthlyFee)))
+                        .minimumMonthlyFee(Double.parseDouble(record.get(Header.MinimumMonthlyFee)))
                         .build())
                 .collect(Collectors.toList());
         merchantRepository.saveAll(merchants);
