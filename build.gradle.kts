@@ -48,8 +48,19 @@ dependencies {
     testImplementation("org.testcontainers:postgresql")
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 tasks.test {
     useJUnitPlatform()
+    filter {
+        excludeTestsMatching("functional.*")
+    }
+}
+
+tasks.register("functionalTest", Test::class) {
+    useJUnitPlatform()
+    filter {
+        includeTestsMatching("functional.*")
+    }
 }
