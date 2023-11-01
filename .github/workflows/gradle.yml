@@ -33,7 +33,7 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           arguments: build
-      - name: Build with Gradle
+      - name: Run functional tests
         uses: gradle/gradle-build-action@v2
         with:
           arguments: functionalTest
