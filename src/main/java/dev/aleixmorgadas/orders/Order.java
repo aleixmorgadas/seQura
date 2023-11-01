@@ -3,9 +3,11 @@ package dev.aleixmorgadas.orders;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Builder
+@Getter
 @Entity(name = "orders")
 @NoArgsConstructor
 @AllArgsConstructor

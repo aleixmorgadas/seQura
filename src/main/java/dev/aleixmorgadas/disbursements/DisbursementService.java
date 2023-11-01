@@ -1,0 +1,43 @@
+package dev.aleixmorgadas.disbursements;
+
+import dev.aleixmorgadas.orders.OrderRepository;
+import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.List;
+
+@Service
+@AllArgsConstructor
+public class DisbursementService {
+    private final DisbursementRepository disbursementRepository;
+    private final OrderRepository orderRepository;
+    public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+    public List<Disbursement> performDisbursementsOn(String date) {
+        var localDate = LocalDate.parse(date, DATE_FORMATTER);
+        var orders = orderRepository.findByCreatedAt(localDate.minusDays(1).format(DATE_FORMATTER));
+        var disbursements = new HashMap<String, Disbursement>();
+        orders.forEach(order -> {
+            var merchant = order.getMerchantReference();
+            var disbursement = disbursements.get(merchant);
+            if (disbursement == null) {
+                String reference = generateDisbursementReference(merchant, date);
+                disbursement = disbursementRepository.findById(reference)
+                        .orElseGet(() -> Disbursement.from(reference, merchant, LocalDate.parse(date)));
+                disbursements.put(merchant, disbursement);
+            }
+            disbursement.addOrder(order);
+        });
+        var dis = disbursements.values().stream()
+                .peek(Disbursement::settle).toList();
+        disbursementRepository.saveAll(dis);
+        return dis;
+    }
+
+    private String generateDisbursementReference(String merchant, String date) {
+        return merchant + "-" + date.replace("-", "");
+    }
+}
