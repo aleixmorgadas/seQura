@@ -9,3 +9,12 @@ Content-Type: text/csv
 --boundary--
 
 ###
+POST http://localhost:8080/merchants
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="file"; filename="merchants.csv";
+Content-Type: text/csv
+
+< ./src/test/resources/csv/merchants.csv
+--boundary--
