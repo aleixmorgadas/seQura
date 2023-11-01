@@ -24,9 +24,9 @@ public class Disbursement {
     private double fees;
     private LocalDate date;
     private boolean settled;
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name = "reference")
-    private List<DisbursementOrder> orders = new ArrayList<>();
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "reference", referencedColumnName = "reference")
+    private List<DisbursementOrder> orders;
 
     public static Disbursement from(String reference, String merchant, LocalDate date) {
         return new Disbursement(reference, merchant, 0.0, 0.0, date, false, new ArrayList<>());

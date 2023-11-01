@@ -5,6 +5,7 @@ import dev.aleixmorgadas.merchants.Merchant;
 import dev.aleixmorgadas.merchants.MerchantRepository;
 import dev.aleixmorgadas.orders.Order;
 import dev.aleixmorgadas.orders.OrderRepository;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -50,6 +51,7 @@ public class DisbursementControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Transactional
     void performDisbursements() throws Exception {
         mockMvc.perform(post(DisbursementController.URI + "/2022-10-08"))
                 .andExpect(status().isOk())
