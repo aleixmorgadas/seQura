@@ -2,6 +2,7 @@ plugins {
     id("java")
     id("org.springframework.boot") version "3.1.5"
     id("io.spring.dependency-management") version "1.1.3"
+    id("io.freefair.lombok") version "8.4"
 }
 
 group = "dev.aleixmorgadas"
@@ -28,7 +29,8 @@ dependencies {
     // data
     implementation("org.springframework.boot:spring-boot-starter-batch")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("org.flywaydb:flyway-core")
+    runtimeOnly("org.flywaydb:flyway-core")
+    implementation("org.apache.commons:commons-csv:1.10.0")
 
     // dev tools
     implementation("org.springframework.boot:spring-boot-starter-actuator")
