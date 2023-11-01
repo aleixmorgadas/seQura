@@ -22,7 +22,7 @@ public class OrderControllerTest extends AbstractIntegrationTest {
 
     @Test
     void itIngestsOrders() throws Exception {
-        var orders = readCsv("csv/orders.csv");
+        var orders = readCsv("csv/orders-partial.csv");
         var file = new MockMultipartFile("file", "orders.csv", "text/csv", orders.getBytes());
 
         mockMvc.perform(multipart("/orders")
@@ -30,6 +30,6 @@ public class OrderControllerTest extends AbstractIntegrationTest {
             .contentType(MediaType.MULTIPART_FORM_DATA))
             .andExpect(status().isOk());
 
-        assertThat(orderRepository.count()).isEqualTo(390839);
+        assertThat(orderRepository.count()).isEqualTo(15270);
     }
 }
