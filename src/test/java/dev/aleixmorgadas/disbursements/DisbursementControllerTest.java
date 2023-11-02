@@ -12,6 +12,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.LocalDate;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -39,7 +41,7 @@ public class DisbursementControllerTest extends AbstractIntegrationTest {
                 null,
                 "wintheiser_bernhard",
                 "25.43",
-                "2022-10-07"
+                LocalDate.parse("2022-10-07")
         ));
     }
 

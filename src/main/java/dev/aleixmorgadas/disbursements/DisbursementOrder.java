@@ -41,6 +41,6 @@ public class DisbursementOrder {
                 order.getId(),
                 Double.parseDouble(order.getAmount()),
                 roundedCommission,
-                LocalDate.parse(order.getCreatedAt()));
+                order.getCreatedAt());
     }
 }

@@ -18,7 +18,7 @@ public class DisbursementService {
 
     public List<Disbursement> performDisbursementsOn(String date) {
         var localDate = LocalDate.parse(date, DATE_FORMATTER);
-        var orders = orderRepository.findByCreatedAt(localDate.minusDays(1).format(DATE_FORMATTER));
+        var orders = orderRepository.findByCreatedAt(localDate.minusDays(1));
         var disbursements = new HashMap<String, Disbursement>();
         orders.forEach(order -> {
             var merchant = order.getMerchantReference();

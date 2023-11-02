@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Builder
 @Getter
 @Entity(name = "orders")
@@ -18,5 +20,5 @@ public class Order {
     Long id;
     String merchantReference;
     String amount;
-    String createdAt;
+    LocalDate createdAt;
 }

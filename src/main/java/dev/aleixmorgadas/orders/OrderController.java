@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.time.LocalDate;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -38,7 +39,7 @@ public class OrderController {
                 .map(record -> Order.builder()
                         .merchantReference(record.get(Header.MerchantReference))
                         .amount(record.get(Header.Amount))
-                        .createdAt(record.get(Header.CreatedAt))
+                        .createdAt(LocalDate.parse(record.get(Header.CreatedAt)))
                         .build())
                 .collect(Collectors.toList());
         orderRepository.saveAll(orders);

@@ -1,8 +1,9 @@
-CREATE TABLE IF NOT EXISTS orders(
-    id SERIAL PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS orders
+(
+    id                 SERIAL PRIMARY KEY,
     merchant_reference VARCHAR(255) NOT NULL,
-    amount VARCHAR(128) NOT NULL,
-    created_at VARCHAR(128)
+    amount             VARCHAR(128) NOT NULL,
+    created_at         DATE         NOT NULL
 );
 
 CREATE SEQUENCE IF NOT EXISTS orders_seq
