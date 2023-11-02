@@ -1,7 +1,10 @@
 package dev.aleixmorgadas.disbursements;
 
+import dev.aleixmorgadas.orders.OrderIngestedEvent;
 import dev.aleixmorgadas.orders.OrderRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -35,6 +38,25 @@ public class DisbursementService {
                 .peek(Disbursement::settle).toList();
         disbursementRepository.saveAll(dis);
         return dis;
+    }
+
+    @EventListener
+    @Async
+    void onOrderIngested(OrderIngestedEvent event) {
+        var orders = event.orders();
+        var disbursements = new HashMap<String, Disbursement>();
+        orders.forEach(order -> {
+            var merchant = order.getMerchantReference();
+            var disbursement = disbursements.get(merchant);
+            if (disbursement == null) {
+                String reference = generateDisbursementReference(merchant, order.getCreatedAt().format(DATE_FORMATTER));
+                disbursement = disbursementRepository.findById(reference)
+                        .orElseGet(() -> Disbursement.from(reference, merchant, order.getCreatedAt()));
+                disbursements.put(merchant, disbursement);
+            }
+            disbursement.addOrder(order);
+        });
+        disbursementRepository.saveAll(disbursements.values());
     }
 
     private String generateDisbursementReference(String merchant, String date) {

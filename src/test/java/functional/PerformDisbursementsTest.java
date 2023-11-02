@@ -24,7 +24,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class PerformDisbursementsTest extends AbstractIntegrationTest {
     @Autowired
     private MerchantRepository merchantRepository;
-
     @Autowired
     private OrderRepository orderRepository;
 
