@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class OrderController {
     public static final String URI = "/orders";
-    private final OrderRepository orderRepository;
+    private final OrderService orderService;
 
     @PostMapping(consumes = "multipart/form-data")
     public ResponseEntity<Void> ingestOrders(
@@ -42,7 +42,7 @@ public class OrderController {
                         .createdAt(LocalDate.parse(record.get(Header.CreatedAt)))
                         .build())
                 .collect(Collectors.toList());
-        orderRepository.saveAll(orders);
+        orderService.saveAll(orders);
         return ResponseEntity.ok(null);
     }
 
