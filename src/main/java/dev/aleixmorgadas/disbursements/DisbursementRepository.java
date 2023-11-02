@@ -1,6 +1,6 @@
 package dev.aleixmorgadas.disbursements;
 
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface DisbursementRepository extends CrudRepository<Disbursement, String> {
+public interface DisbursementRepository extends JpaRepository<Disbursement, String> {
 }
