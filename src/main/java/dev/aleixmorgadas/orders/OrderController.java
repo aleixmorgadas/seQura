@@ -51,4 +51,9 @@ public class OrderController {
         Amount,
         CreatedAt
     }
+
+    public record OrderRequest(
+            String merchantReference,
+            String amount,
+            String createdAt) {}
 }
