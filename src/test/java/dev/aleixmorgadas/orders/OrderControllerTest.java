@@ -22,6 +22,7 @@ public class OrderControllerTest extends AbstractIntegrationTest {
     @AfterEach
     void cleanUp() {
         orderRepository.deleteAll();
+        cleanDisbursements();
     }
 
     @Test
@@ -34,7 +35,7 @@ public class OrderControllerTest extends AbstractIntegrationTest {
             .contentType(MediaType.MULTIPART_FORM_DATA))
             .andExpect(status().isOk());
 
-        assertThat(orderRepository.count()).isEqualTo(15270);
+        assertThat(orderRepository.count()).isEqualTo(521);
     }
 
     @Test

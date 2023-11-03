@@ -2,6 +2,8 @@ package dev.aleixmorgadas;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
+import dev.aleixmorgadas.disbursements.DisbursementOrderRepository;
+import dev.aleixmorgadas.disbursements.DisbursementRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,6 +27,10 @@ public abstract class AbstractIntegrationTest {
             .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
     @Autowired
     protected MockMvc mockMvc;
+    @Autowired
+    DisbursementOrderRepository disbursementOrderRepository;
+    @Autowired
+    DisbursementRepository disbursementRepository;
 
     @ServiceConnection
     static final PostgreSQLContainer<?> postgresContainer = new PostgreSQLContainer<>("postgres:16.0");
@@ -38,4 +44,9 @@ public abstract class AbstractIntegrationTest {
     }
 
     public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+    protected void cleanDisbursements() {
+        disbursementOrderRepository.deleteAll();
+        disbursementRepository.deleteAll();
+    }
 }
