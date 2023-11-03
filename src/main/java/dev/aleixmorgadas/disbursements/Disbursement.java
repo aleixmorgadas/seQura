@@ -23,7 +23,7 @@ public class Disbursement {
     private double amount;
     private double fees;
     private LocalDate date;
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = { CascadeType.ALL }, orphanRemoval = true)
     @JoinColumn(name = "reference", referencedColumnName = "reference")
     private List<DisbursementOrder> orders;
     @Version

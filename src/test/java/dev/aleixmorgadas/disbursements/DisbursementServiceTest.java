@@ -3,10 +3,13 @@ package dev.aleixmorgadas.disbursements;
 import dev.aleixmorgadas.AbstractIntegrationTest;
 import dev.aleixmorgadas.orders.Order;
 import dev.aleixmorgadas.orders.OrderIngestedEvent;
-import jakarta.transaction.Transactional;
+import dev.aleixmorgadas.orders.OrderPlaced;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.test.context.transaction.AfterTransaction;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -21,15 +24,21 @@ class DisbursementServiceTest extends AbstractIntegrationTest {
     @Autowired
     private DisbursementRepository disbursementRepository;
 
+    @AfterEach
+    @AfterTransaction
+    void cleanUp() {
+        disbursementRepository.deleteAll();
+    }
+
     @Test
     @Transactional
-    void itShouldPerformADisbursementOnNewOrderIngestedEvent() {
+    public void itShouldPerformADisbursementOnNewOrderIngestedEvent() {
         publisher.publishEvent(
                 new OrderIngestedEvent(List.of(
                         new Order(
                                 1L,
                                 "wintheiser_bernhard",
-                                "25.43",
+                                "50.00",
                                 LocalDate.parse("2021-05-03")
                         )
                 ), LocalDate.parse("2021-05-03")));
@@ -41,8 +50,23 @@ class DisbursementServiceTest extends AbstractIntegrationTest {
         assertThat(disbursement.getReference()).isEqualTo("wintheiser_bernhard-20210503");
         assertThat(disbursement.getMerchant()).isEqualTo("wintheiser_bernhard");
         assertThat(disbursement.getDate()).isEqualTo(LocalDate.parse("2021-05-03"));
-        assertThat(disbursement.getAmount()).isEqualTo(25.17);
-        assertThat(disbursement.getFees()).isEqualTo(0.26);
+        assertThat(disbursement.getAmount()).isEqualTo(49.5);
+        assertThat(disbursement.getFees()).isEqualTo(0.5);
         assertThat(disbursement.getOrders()).hasSize(1);
+    }
+
+    @Test
+    void onOrderPlacedTest() {
+        publisher.publishEvent(new OrderPlaced(
+                new Order(
+                        1L,
+                        "wintheiser_bernhard",
+                        "25.00",
+                        LocalDate.parse("2021-05-03")
+                ),
+                LocalDate.parse("2021-05-03")
+        ));
+
+        assertThat(disbursementRepository.count()).isEqualTo(1);
     }
 }

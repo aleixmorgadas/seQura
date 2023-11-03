@@ -4,10 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -44,6 +41,19 @@ public class OrderController {
                 .collect(Collectors.toList());
         orderService.saveAll(orders);
         return ResponseEntity.ok(null);
+    }
+
+    @PostMapping(consumes = "application/json")
+    public ResponseEntity<Order> newOrder(
+            @RequestBody OrderRequest orderRequest
+    ) {
+        var order = Order.builder()
+                .merchantReference(orderRequest.merchantReference())
+                .amount(orderRequest.amount())
+                .createdAt(LocalDate.parse(orderRequest.createdAt()))
+                .build();
+        orderService.save(order);
+        return ResponseEntity.ok(order);
     }
 
     enum Header {

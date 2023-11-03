@@ -20,4 +20,12 @@ public class OrderService {
                 LocalDate.now()
         ));
     }
+
+    public void save(Order order) {
+        repository.save(order);
+        publisher.publishEvent(new OrderPlaced(
+                order,
+                LocalDate.now()
+        ));
+    }
 }
