@@ -23,6 +23,8 @@ class DisbursementServiceTest extends AbstractIntegrationTest {
     private ApplicationEventPublisher publisher;
     @Autowired
     private DisbursementRepository disbursementRepository;
+    @Autowired
+    private DisbursementOrderRepository disbursementOrderRepository;
 
     @AfterEach
     @AfterTransaction
@@ -67,6 +69,8 @@ class DisbursementServiceTest extends AbstractIntegrationTest {
                 LocalDate.parse("2021-05-03")
         ));
 
-        assertThat(disbursementRepository.count()).isEqualTo(1);
+        await()
+                .atMost(1, TimeUnit.SECONDS)
+                .until(() -> disbursementOrderRepository.count() == 1);
     }
 }

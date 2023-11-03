@@ -3,10 +3,8 @@ package dev.aleixmorgadas.disbursements;
 import dev.aleixmorgadas.orders.OrderIngestedEvent;
 import dev.aleixmorgadas.orders.OrderPlaced;
 import dev.aleixmorgadas.orders.OrderRepository;
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.context.event.EventListener;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 public class DisbursementService {
     private final DisbursementRepository disbursementRepository;
+    private final DisbursementOrderRepository disbursementOrderRepository;
     private final OrderRepository orderRepository;
     public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -42,8 +41,7 @@ public class DisbursementService {
         return dis;
     }
 
-    @Async
-    @EventListener
+    @Async @EventListener
     void onOrderIngested(OrderIngestedEvent event) {
         var orders = event.orders();
         var disbursements = new HashMap<String, Disbursement>();
@@ -62,17 +60,11 @@ public class DisbursementService {
         disbursements.clear();
     }
 
-    @EventListener
-    @Transactional
-    @Retryable
-    @Async
+    @Async @EventListener
     public void onOrderPlaced(OrderPlaced orderPlaced) {
-        var merchant = orderPlaced.order().getMerchantReference();
-        var reference = generateDisbursementReference(merchant, orderPlaced.order().getCreatedAt().format(DATE_FORMATTER));
-        var disbursement = disbursementRepository.findById(reference)
-                .orElseGet(() -> Disbursement.from(reference, merchant, orderPlaced.order().getCreatedAt()));
-        disbursement.addOrder(orderPlaced.order());
-        disbursementRepository.save(disbursement);
+        var order = orderPlaced.order();
+        var disbursementOrder = DisbursementOrder.from(order);
+        disbursementOrderRepository.save(disbursementOrder);
     }
 
     private String generateDisbursementReference(String merchant, String date) {
