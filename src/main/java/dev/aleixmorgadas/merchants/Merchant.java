@@ -6,6 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
+
 @Builder
 @Entity(name = "merchants")
 @NoArgsConstructor
@@ -17,4 +20,16 @@ public class Merchant {
     String liveOn;
     String disbursementFrequency;
     double minimumMonthlyFee;
+
+    public LocalDate nextDisbursementDate(LocalDate date) {
+        if ("DAILY".equals(disbursementFrequency)) {
+            return date;
+        }
+        var liveOnDate = LocalDate.parse(liveOn);
+        if (liveOnDate.getDayOfWeek() == date.getDayOfWeek()) {
+            return date;
+        }
+
+        return date.with(TemporalAdjusters.next(liveOnDate.getDayOfWeek()));
+    }
 }
