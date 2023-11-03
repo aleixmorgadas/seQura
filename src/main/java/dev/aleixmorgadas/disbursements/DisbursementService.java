@@ -63,7 +63,8 @@ public class DisbursementService {
     @Async @EventListener
     public void onOrderPlaced(OrderPlaced orderPlaced) {
         var order = orderPlaced.order();
-        var disbursementOrder = DisbursementOrder.from(order);
+        var reference = generateDisbursementReference(order.getMerchantReference(), order.getCreatedAt().format(DATE_FORMATTER));
+        var disbursementOrder = DisbursementOrder.from(order, reference);
         disbursementOrderRepository.save(disbursementOrder);
     }
 

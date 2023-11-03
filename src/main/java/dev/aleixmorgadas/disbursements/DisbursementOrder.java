@@ -21,8 +21,9 @@ public class DisbursementOrder {
     private double amount;
     private double commission;
     private LocalDate createdAt;
+    private String reference;
 
-    public static DisbursementOrder from(Order order) {
+    public static DisbursementOrder from(Order order, String reference) {
         var amount = Double.parseDouble(order.getAmount());
         var commission = 0.0;
         if (amount <= 50) {
@@ -41,6 +42,7 @@ public class DisbursementOrder {
                 order.getId(),
                 Double.parseDouble(order.getAmount()),
                 roundedCommission,
-                order.getCreatedAt());
+                order.getCreatedAt(),
+                reference);
     }
 }

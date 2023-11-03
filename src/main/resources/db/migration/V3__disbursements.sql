@@ -14,6 +14,8 @@ CREATE TABLE IF NOT EXISTS disbursements_orders
     amount     NUMERIC(10, 2) NOT NULL,
     commission NUMERIC(10, 2) NOT NULL,
     created_at DATE           NOT NULL,
-    reference  VARCHAR(255),
-    FOREIGN KEY (reference) REFERENCES disbursements (reference)
+    reference  VARCHAR(255)   NOT NULL
 );
+
+ALTER TABLE disbursements_orders
+    ADD CONSTRAINT disbursements_orders_id_reference UNIQUE (id, reference);

@@ -26,14 +26,13 @@ class DisbursementServiceTest extends AbstractIntegrationTest {
     @Autowired
     private DisbursementOrderRepository disbursementOrderRepository;
 
-    @AfterEach
-    @AfterTransaction
+    @AfterEach @AfterTransaction
     void cleanUp() {
+        disbursementOrderRepository.deleteAll();
         disbursementRepository.deleteAll();
     }
 
-    @Test
-    @Transactional
+    @Test @Transactional
     public void itShouldPerformADisbursementOnNewOrderIngestedEvent() {
         publisher.publishEvent(
                 new OrderIngestedEvent(List.of(
