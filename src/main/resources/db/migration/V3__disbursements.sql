@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS disbursements
 CREATE TABLE IF NOT EXISTS disbursements_orders
 (
     id         SERIAL PRIMARY KEY,
+    merchant   VARCHAR(255)   NOT NULL,
     amount     NUMERIC(10, 2) NOT NULL,
     commission NUMERIC(10, 2) NOT NULL,
     created_at DATE           NOT NULL,

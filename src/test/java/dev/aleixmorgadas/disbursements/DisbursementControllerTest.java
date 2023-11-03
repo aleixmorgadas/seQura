@@ -5,6 +5,7 @@ import dev.aleixmorgadas.merchants.Merchant;
 import dev.aleixmorgadas.merchants.MerchantRepository;
 import dev.aleixmorgadas.orders.Order;
 import dev.aleixmorgadas.orders.OrderRepository;
+import dev.aleixmorgadas.orders.OrderService;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -26,6 +27,8 @@ public class DisbursementControllerTest extends AbstractIntegrationTest {
     @Autowired
     private MerchantRepository merchantRepository;
     @Autowired
+    private OrderService orderService;
+    @Autowired
     private OrderRepository orderRepository;
 
     @BeforeAll
@@ -37,7 +40,7 @@ public class DisbursementControllerTest extends AbstractIntegrationTest {
                 "DAILY",
                 15.0
         ));
-        orderRepository.save(new Order(
+        orderService.save(new Order(
                 null,
                 "wintheiser_bernhard",
                 "25.43",
@@ -49,7 +52,7 @@ public class DisbursementControllerTest extends AbstractIntegrationTest {
     void tearDown() {
         orderRepository.deleteAll();
         merchantRepository.deleteAll();
-        disbursementRepository.deleteAll();
+        cleanDisbursements();
     }
 
     @Test

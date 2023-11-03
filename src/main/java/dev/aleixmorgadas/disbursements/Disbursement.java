@@ -35,6 +35,10 @@ public class Disbursement {
 
     public void addOrder(Order order) {
         var disbursementOrder = DisbursementOrder.from(order, this.reference);
+        addOrder(disbursementOrder);
+    }
+
+    public void addOrder(DisbursementOrder disbursementOrder) {
         this.orders.add(disbursementOrder);
         this.amount += BigDecimal.valueOf(disbursementOrder.getAmount() - disbursementOrder.getCommission())
                 .setScale(2, RoundingMode.HALF_UP)

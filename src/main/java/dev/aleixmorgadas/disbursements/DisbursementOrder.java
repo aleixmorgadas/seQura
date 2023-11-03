@@ -18,6 +18,7 @@ import java.time.LocalDate;
 public class DisbursementOrder {
     @Id
     private long id;
+    private String merchant;
     private double amount;
     private double commission;
     private LocalDate createdAt;
@@ -40,6 +41,7 @@ public class DisbursementOrder {
                 .doubleValue();
         return new DisbursementOrder(
                 order.getId(),
+                order.getMerchantReference(),
                 Double.parseDouble(order.getAmount()),
                 roundedCommission,
                 order.getCreatedAt(),
