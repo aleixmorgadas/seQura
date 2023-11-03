@@ -40,6 +40,14 @@ Disbursements will be calculated at read time instead of write time as before.
 - Disbursement is a view instead of a domain entity.
 - DisbursementOrder is a domain entity that contains the necessary information to create a Disbursement view.
 
+## Outcome
+
+![Concurrency test results after change](./assets/concurrency-test-second-iteration-results.png)
+
+We can see how the concurrency problem has been solved.
+
+- 0% failure rate.
+- 69853 orders processed in 30 seconds, that's several times faster previous solutions.
 
 ## Alternatives considered
 
