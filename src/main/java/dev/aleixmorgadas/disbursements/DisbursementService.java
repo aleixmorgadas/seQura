@@ -34,8 +34,7 @@ public class DisbursementService {
             }
             disbursement.addOrder(order);
         });
-        var dis = disbursements.values().stream()
-                .peek(Disbursement::settle).toList();
+        var dis = disbursements.values().stream().toList();
         disbursementRepository.saveAll(dis);
         return dis;
     }

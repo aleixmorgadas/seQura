@@ -29,7 +29,6 @@ public class DisbursementController {
             String merchant,
             double amount,
             double fees,
-            boolean settled,
             int ordersAmount,
             String date
     ) {
@@ -39,7 +38,6 @@ public class DisbursementController {
                     disbursement.getMerchant(),
                     disbursement.getAmount(),
                     disbursement.getFees(),
-                    disbursement.isSettled(),
                     disbursement.getOrders().size(),
                     disbursement.getDate().format(DisbursementService.DATE_FORMATTER)
             );

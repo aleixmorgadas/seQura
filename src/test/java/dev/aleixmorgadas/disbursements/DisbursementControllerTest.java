@@ -63,7 +63,6 @@ public class DisbursementControllerTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$[0].amount").value(25.17))
                 .andExpect(jsonPath("$[0].fees").value(0.26))
                 .andExpect(jsonPath("$[0].date").value("2022-10-08"))
-                .andExpect(jsonPath("$[0].settled").value(true))
                 .andExpect(jsonPath("$[0].ordersAmount").value(1));
 
         var disbursements = disbursementRepository.findById("wintheiser_bernhard-20221008")
@@ -73,7 +72,6 @@ public class DisbursementControllerTest extends AbstractIntegrationTest {
         assertThat(disbursements.getAmount()).isEqualTo(25.17);
         assertThat(disbursements.getFees()).isEqualTo(0.26);
         assertThat(disbursements.getDate()).isEqualTo("2022-10-08");
-        assertThat(disbursements.isSettled()).isTrue();
         assertThat(disbursements.getOrders()).hasSize(1);
         assertThat(disbursements.getOrders().get(0).getAmount()).isEqualTo(25.43);
         assertThat(disbursements.getOrders().get(0).getCommission()).isEqualTo(0.26);

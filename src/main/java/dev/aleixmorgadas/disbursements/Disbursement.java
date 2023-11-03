@@ -23,13 +23,14 @@ public class Disbursement {
     private double amount;
     private double fees;
     private LocalDate date;
-    private boolean settled;
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "reference", referencedColumnName = "reference")
     private List<DisbursementOrder> orders;
+    @Version
+    private long version;
 
     public static Disbursement from(String reference, String merchant, LocalDate date) {
-        return new Disbursement(reference, merchant, 0.0, 0.0, date, false, new ArrayList<>());
+        return new Disbursement(reference, merchant, 0, 0, date, new ArrayList<>(), 0);
     }
 
     public void addOrder(Order order) {
@@ -39,9 +40,5 @@ public class Disbursement {
                 .setScale(2, RoundingMode.HALF_UP)
                 .doubleValue();
         this.fees += disbursementOrder.getCommission();
-    }
-
-    public void settle() {
-        this.settled = true;
     }
 }
