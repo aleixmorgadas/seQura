@@ -6,6 +6,7 @@ import dev.aleixmorgadas.orders.OrderRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.context.event.EventListener;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -63,6 +64,8 @@ public class DisbursementService {
 
     @EventListener
     @Transactional
+    @Retryable
+    @Async
     public void onOrderPlaced(OrderPlaced orderPlaced) {
         var merchant = orderPlaced.order().getMerchantReference();
         var reference = generateDisbursementReference(merchant, orderPlaced.order().getCreatedAt().format(DATE_FORMATTER));

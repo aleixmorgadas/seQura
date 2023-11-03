@@ -39,10 +39,10 @@ We detected that the problem exists.
 With 10 concurrent users for 30 seconds, we got the next numbers:
 
 - 13905 orders created.
-- 11887 succeed.
-- 2018 failed due to `PSQLExecption`.
+- 2018 succeed.
+- 11887 failed due to `PSQLExecption`.
 
-It means only the 85.48% of the `disbursement` operations were successful.
+It means that the 85.48% of the `disbursement` operations failed.
 
 In concrete, we got:
 

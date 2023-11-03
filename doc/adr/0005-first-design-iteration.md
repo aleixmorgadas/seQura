@@ -4,7 +4,7 @@ Date: 2023-11-03
 
 ## Status
 
-Accepted
+Superseded by [7. second disbursement iteration](0007-second-disbursement-iteration.md)
 
 ## Context
 
