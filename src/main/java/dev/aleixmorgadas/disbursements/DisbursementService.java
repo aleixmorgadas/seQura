@@ -26,21 +26,7 @@ public class DisbursementService {
         var localDate = LocalDate.parse(date, DATE_FORMATTER);
         var disbursements = new ArrayList<Disbursement>();
 
-        var dailyMerchants = merchantRepository.findAllByDisbursementFrequency("DAILY");
-        dailyMerchants.forEach(merchant -> {
-            var disbursementReference = DisbursementReference.from(merchant, localDate);
-            var disbursement = disbursementRepository.findById(disbursementReference).orElseGet(() -> {
-                var orders = disbursementOrderRepository.findByReference(disbursementReference);
-                var d = Disbursement.from(disbursementReference, merchant.getReference(), localDate);
-                d.addOrders(orders);
-                disbursementRepository.save(d);
-                return d;
-            });
-            disbursements.add(disbursement);
-        });
-
-        var weeklyMerchants = merchantRepository.findAllByDisbursementFrequency("WEEKLY");
-        weeklyMerchants
+        merchantRepository.findAll()
                 .stream()
                 .filter(merchant -> merchant.isDisbursementDate(localDate))
                 .forEach(merchant -> {
