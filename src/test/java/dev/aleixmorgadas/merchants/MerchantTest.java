@@ -24,7 +24,7 @@ class MerchantTest {
                 .build();
 
         assertThat(dailyDisbursementMerchant.nextDisbursementDate(LocalDate.parse("2023-11-03")))
-                .isEqualTo(LocalDate.parse("2023-11-03"));
+                .isEqualTo(LocalDate.parse("2023-11-04"));
     }
 
     @ParameterizedTest
@@ -42,10 +42,33 @@ class MerchantTest {
                 .isEqualTo(expected);
     }
 
+    @ParameterizedTest
+    @MethodSource("disbursementDatesIsDisbursementDay")
+    void isDisbursementDay(String frequency, String liveOn, LocalDate input, boolean expected) {
+        var dailyDisbursementMerchant = Merchant.builder()
+                .reference("MERCHANT-1")
+                .email("merchant@example.com")
+                .liveOn(liveOn)
+                .minimumMonthlyFee(25)
+                .disbursementFrequency(frequency)
+                .build();
+
+        assertThat(dailyDisbursementMerchant.isDisbursementDate(input))
+                .isEqualTo(expected);
+    }
+
     private static Stream<Arguments> disbursementDates() {
         return Stream.of(
                 Arguments.of("2023-11-01", LocalDate.parse("2023-11-03"), LocalDate.parse("2023-11-08")),
-                Arguments.of("2023-11-01", LocalDate.parse("2023-11-08"), LocalDate.parse("2023-11-08"))
+                Arguments.of("2023-11-01", LocalDate.parse("2023-11-08"), LocalDate.parse("2023-11-15"))
+        );
+    }
+
+    private static Stream<Arguments> disbursementDatesIsDisbursementDay() {
+        return Stream.of(
+                Arguments.of("DAILY", "2023-11-01", LocalDate.parse("2023-11-03"), true),
+                Arguments.of("WEEKLY", "2023-11-01", LocalDate.parse("2023-11-08"), true),
+                Arguments.of("WEEKLY", "2023-11-01", LocalDate.parse("2023-11-03"), false)
         );
     }
 }
