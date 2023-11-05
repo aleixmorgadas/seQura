@@ -9,6 +9,16 @@ Content-Type: text/csv
 --boundary--
 
 ###
+POST http://localhost:8080/orders
+Content-Type: application/json
+
+{
+  "merchantReference": "weekly-merchant",
+  "amount": "25.00",
+  "createdAt": "2023-11-03"
+}
+
+###
 POST http://localhost:8080/merchants
 Content-Type: multipart/form-data; boundary=boundary
 
@@ -18,3 +28,10 @@ Content-Type: text/csv
 
 < ./src/test/resources/csv/merchants.csv
 --boundary--
+
+###
+POST http://localhost:8080/disbursements/2023-11-08
+Content-Type: application/json
+
+{
+}
