@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
@@ -14,7 +15,7 @@ import java.time.format.DateTimeFormatter;
 @EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
-public class DisbursementReference {
+public class DisbursementReference implements Serializable {
     public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     String reference;
 

@@ -1,6 +1,7 @@
 package dev.aleixmorgadas.disbursements;
 
 import dev.aleixmorgadas.merchants.MerchantRepository;
+import dev.aleixmorgadas.orders.Order;
 import dev.aleixmorgadas.orders.OrderIngestedEvent;
 import dev.aleixmorgadas.orders.OrderPlaced;
 import lombok.AllArgsConstructor;
@@ -11,7 +12,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 @Service
@@ -47,28 +47,22 @@ public class DisbursementService {
     @EventListener
     void onOrderIngested(OrderIngestedEvent event) {
         var orders = event.orders();
-        var disbursements = new HashMap<DisbursementReference, Disbursement>();
-        orders.forEach(order -> {
-            var merchant = merchantRepository.findById(order.getMerchantReference())
-                    .orElseThrow(() -> new RuntimeException("Merchant not found"));
-            var reference = DisbursementReference.from(merchant, order);
-            var disbursement = disbursements.get(reference);
-            if (disbursement == null) {
-                var nextDisbursementDate = merchant.nextDisbursementDate(order.getCreatedAt());
-                disbursement = disbursementRepository.findById(reference)
-                        .orElseGet(() -> Disbursement.from(reference, merchant.getReference(), nextDisbursementDate));
-                disbursements.put(reference, disbursement);
-            }
-            disbursement.addOrder(order);
-        });
-        disbursementRepository.saveAll(disbursements.values());
-        disbursements.clear();
+        orders.forEach(this::storeOrder);
+
+        var earliestOrderDate = orders.stream().map(Order::getCreatedAt).min(LocalDate::compareTo).orElseThrow();
+        var latestOrderDate = orders.stream().map(Order::getCreatedAt).max(LocalDate::compareTo).orElseThrow();
+        earliestOrderDate.datesUntil(latestOrderDate.plusDays(2))
+                .forEach(date -> performDisbursementsOn(date.format(DATE_FORMATTER)));
     }
 
     @Async
     @EventListener
     public void onOrderPlaced(OrderPlaced orderPlaced) {
         var order = orderPlaced.order();
+        storeOrder(order);
+    }
+
+    private void storeOrder(Order order) {
         var merchant = merchantRepository.findById(order.getMerchantReference())
                 .orElseThrow(() -> new RuntimeException("Merchant not found"));
         var reference = DisbursementReference.from(merchant, order);

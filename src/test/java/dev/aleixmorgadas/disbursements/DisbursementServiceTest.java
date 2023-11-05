@@ -59,9 +59,10 @@ class DisbursementServiceTest extends AbstractIntegrationTest {
     public void itShouldPerformADisbursementOnNewOrderIngestedEvent() {
         publisher.publishEvent(new OrderIngestedEvent(List.of(new Order(1L, DAILY_MERCHANT, "50.00", LocalDate.parse("2023-11-03"))), LocalDate.parse("2023-11-03")));
 
-        await().atMost(5, TimeUnit.SECONDS).until(() -> disbursementRepository.count() == 1);
+        await().atMost(1, TimeUnit.SECONDS).until(() -> disbursementRepository.count() == 2);
 
-        var disbursement = disbursementRepository.findAll().get(0);
+        var disbursement = disbursementRepository.findByMerchantAndDate(DAILY_MERCHANT, LocalDate.parse("2023-11-04"))
+                        .orElseThrow(() -> new AssertionError("Disbursement not found"));
         assertThat(disbursement.getReference().reference).isEqualTo(DAILY_MERCHANT + "-20231104");
         assertThat(disbursement.getMerchant()).isEqualTo(DAILY_MERCHANT);
         assertThat(disbursement.getDate()).isEqualTo(LocalDate.parse("2023-11-04"));
