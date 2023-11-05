@@ -2,5 +2,8 @@ package dev.aleixmorgadas.merchants;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface MerchantRepository extends JpaRepository<Merchant, Long> {
+import java.util.List;
+
+public interface MerchantRepository extends JpaRepository<Merchant, String> {
+    List<Merchant> findAllByDisbursementFrequency(String frequency);
 }

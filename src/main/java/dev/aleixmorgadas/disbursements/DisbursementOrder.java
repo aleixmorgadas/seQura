@@ -4,6 +4,7 @@ import dev.aleixmorgadas.orders.Order;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -12,6 +13,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 
 @Getter
+@EqualsAndHashCode
 @Entity(name = "disbursements_orders")
 @NoArgsConstructor
 @AllArgsConstructor

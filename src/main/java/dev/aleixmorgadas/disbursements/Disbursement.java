@@ -45,4 +45,8 @@ public class Disbursement {
                 .doubleValue();
         this.fees += disbursementOrder.getCommission();
     }
+
+    public void addOrders(List<DisbursementOrder> orders) {
+        orders.forEach(this::addOrder);
+    }
 }
