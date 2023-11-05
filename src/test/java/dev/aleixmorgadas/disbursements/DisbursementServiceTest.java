@@ -89,4 +89,19 @@ class DisbursementServiceTest extends AbstractIntegrationTest {
         assertThat(disbursements).hasSize(2);
         assertThat(disbursements.get(1).getOrders().get(0)).isEqualTo(disbursementOrderOnTuesday);
     }
+
+    @Test
+    @Transactional
+    void performDisbursementsIsAnIdempotentOperation() {
+        var disbursementOrderOnTuesday = new DisbursementOrder(1L, WEEKLY_MERCHANT, 50.00, 0.5, LocalDate.parse("2023-11-03"), WEEKLY_MERCHANT + "-20231108");
+        disbursementOrderRepository.save(disbursementOrderOnTuesday);
+
+        var disbursements = disbursementService.performDisbursementsOn("2023-11-08");
+
+        assertThat(disbursements).hasSize(2);
+        assertThat(disbursements.get(1).getOrders().get(0)).isEqualTo(disbursementOrderOnTuesday);
+
+        var idempotentDisbursements = disbursementService.performDisbursementsOn("2023-11-08");
+        assertThat(idempotentDisbursements.get(1).getOrders()).hasSize(1);
+    }
 }
