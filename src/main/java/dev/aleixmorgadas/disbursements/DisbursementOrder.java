@@ -1,6 +1,7 @@
 package dev.aleixmorgadas.disbursements;
 
 import dev.aleixmorgadas.orders.Order;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
@@ -24,9 +25,10 @@ public class DisbursementOrder {
     private double amount;
     private double commission;
     private LocalDate createdAt;
-    private String reference;
+    @Embedded
+    private DisbursementReference reference;
 
-    public static DisbursementOrder from(Order order, String reference) {
+    public static DisbursementOrder from(Order order, DisbursementReference reference) {
         var amount = Double.parseDouble(order.getAmount());
         var commission = 0.0;
         if (amount <= 50) {

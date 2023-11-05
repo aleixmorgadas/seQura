@@ -17,8 +17,8 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Disbursement {
-    @Id
-    private String reference;
+    @EmbeddedId
+    private DisbursementReference reference;
     private String merchant;
     private double amount;
     private double fees;
@@ -29,7 +29,7 @@ public class Disbursement {
     @Version
     private long version;
 
-    public static Disbursement from(String reference, String merchant, LocalDate date) {
+    public static Disbursement from(DisbursementReference reference, String merchant, LocalDate date) {
         return new Disbursement(reference, merchant, 0, 0, date, new ArrayList<>(), 0);
     }
 

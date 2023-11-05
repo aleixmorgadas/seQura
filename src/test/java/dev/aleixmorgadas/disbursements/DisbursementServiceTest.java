@@ -62,7 +62,7 @@ class DisbursementServiceTest extends AbstractIntegrationTest {
         await().atMost(5, TimeUnit.SECONDS).until(() -> disbursementRepository.count() == 1);
 
         var disbursement = disbursementRepository.findAll().get(0);
-        assertThat(disbursement.getReference()).isEqualTo(DAILY_MERCHANT + "-20231103");
+        assertThat(disbursement.getReference().reference).isEqualTo(DAILY_MERCHANT + "-20231104");
         assertThat(disbursement.getMerchant()).isEqualTo(DAILY_MERCHANT);
         assertThat(disbursement.getDate()).isEqualTo(LocalDate.parse("2023-11-04"));
         assertThat(disbursement.getAmount()).isEqualTo(49.5);
@@ -80,8 +80,8 @@ class DisbursementServiceTest extends AbstractIntegrationTest {
     @Test
     @Transactional
     void performADisbursementWithWeeklyMerchantsInvolved() {
-        var disbursementOrderOnTuesday = new DisbursementOrder(1L, WEEKLY_MERCHANT, 50.00, 0.5, LocalDate.parse("2023-11-03"), WEEKLY_MERCHANT + "-20231108");
-        var disbursementOrderOnWednesday = new DisbursementOrder(2L, WEEKLY_MERCHANT, 50.00, 0.5, LocalDate.parse("2023-11-08"), WEEKLY_MERCHANT + "-20231115");
+        var disbursementOrderOnTuesday = new DisbursementOrder(1L, WEEKLY_MERCHANT, 50.00, 0.5, LocalDate.parse("2023-11-03"), new DisbursementReference(WEEKLY_MERCHANT + "-20231108"));
+        var disbursementOrderOnWednesday = new DisbursementOrder(2L, WEEKLY_MERCHANT, 50.00, 0.5, LocalDate.parse("2023-11-08"), new DisbursementReference(WEEKLY_MERCHANT + "-20231115"));
         disbursementOrderRepository.saveAll(List.of(disbursementOrderOnTuesday, disbursementOrderOnWednesday));
 
         var disbursements = disbursementService.performDisbursementsOn("2023-11-08");
@@ -93,7 +93,7 @@ class DisbursementServiceTest extends AbstractIntegrationTest {
     @Test
     @Transactional
     void performDisbursementsIsAnIdempotentOperation() {
-        var disbursementOrderOnTuesday = new DisbursementOrder(1L, WEEKLY_MERCHANT, 50.00, 0.5, LocalDate.parse("2023-11-03"), WEEKLY_MERCHANT + "-20231108");
+        var disbursementOrderOnTuesday = new DisbursementOrder(1L, WEEKLY_MERCHANT, 50.00, 0.5, LocalDate.parse("2023-11-03"), new DisbursementReference(WEEKLY_MERCHANT + "-20231108"));
         disbursementOrderRepository.save(disbursementOrderOnTuesday);
 
         var disbursements = disbursementService.performDisbursementsOn("2023-11-08");

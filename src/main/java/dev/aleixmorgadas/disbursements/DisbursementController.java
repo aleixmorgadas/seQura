@@ -34,7 +34,7 @@ public class DisbursementController {
     ) {
         static DisbursementResponse from(Disbursement disbursement) {
             return new DisbursementResponse(
-                    disbursement.getReference(),
+                    disbursement.getReference().reference,
                     disbursement.getMerchant(),
                     disbursement.getAmount(),
                     disbursement.getFees(),

@@ -1,6 +1,5 @@
 package dev.aleixmorgadas.disbursements;
 
-import dev.aleixmorgadas.merchants.Merchant;
 import dev.aleixmorgadas.merchants.MerchantRepository;
 import dev.aleixmorgadas.orders.OrderIngestedEvent;
 import dev.aleixmorgadas.orders.OrderPlaced;
@@ -29,7 +28,7 @@ public class DisbursementService {
 
         var dailyMerchants = merchantRepository.findAllByDisbursementFrequency("DAILY");
         dailyMerchants.forEach(merchant -> {
-            var disbursementReference = generateDisbursementReference(merchant, localDate);
+            var disbursementReference = DisbursementReference.from(merchant, localDate);
             var disbursement = disbursementRepository.findById(disbursementReference).orElseGet(() -> {
                 var orders = disbursementOrderRepository.findByReference(disbursementReference);
                 var d = Disbursement.from(disbursementReference, merchant.getReference(), localDate);
@@ -45,7 +44,7 @@ public class DisbursementService {
                 .stream()
                 .filter(merchant -> merchant.isDisbursementDate(localDate))
                 .forEach(merchant -> {
-                    var disbursementReference = generateDisbursementReference(merchant, localDate);
+                    var disbursementReference = DisbursementReference.from(merchant, localDate);
                     var disbursement = disbursementRepository.findById(disbursementReference).orElseGet(() -> {
                         var orders = disbursementOrderRepository.findByReference(disbursementReference);
                         var d = Disbursement.from(disbursementReference, merchant.getReference(), localDate);
@@ -62,11 +61,11 @@ public class DisbursementService {
     @EventListener
     void onOrderIngested(OrderIngestedEvent event) {
         var orders = event.orders();
-        var disbursements = new HashMap<String, Disbursement>();
+        var disbursements = new HashMap<DisbursementReference, Disbursement>();
         orders.forEach(order -> {
             var merchant = merchantRepository.findById(order.getMerchantReference())
                     .orElseThrow(() -> new RuntimeException("Merchant not found"));
-            String reference = generateDisbursementReference(merchant, order.getCreatedAt());
+            var reference = DisbursementReference.from(merchant, order);
             var disbursement = disbursements.get(reference);
             if (disbursement == null) {
                 var nextDisbursementDate = merchant.nextDisbursementDate(order.getCreatedAt());
@@ -86,12 +85,8 @@ public class DisbursementService {
         var order = orderPlaced.order();
         var merchant = merchantRepository.findById(order.getMerchantReference())
                 .orElseThrow(() -> new RuntimeException("Merchant not found"));
-        var reference = generateDisbursementReference(merchant, merchant.nextDisbursementDate(order.getCreatedAt()));
+        var reference = DisbursementReference.from(merchant, order);
         var disbursementOrder = DisbursementOrder.from(order, reference);
         disbursementOrderRepository.save(disbursementOrder);
-    }
-
-    private String generateDisbursementReference(Merchant merchant, LocalDate date) {
-        return merchant.getReference() + "-" + date.format(DATE_FORMATTER).replace("-", "");
     }
 }

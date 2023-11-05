@@ -68,7 +68,7 @@ public class DisbursementControllerTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$[0].date").value("2022-10-08"))
                 .andExpect(jsonPath("$[0].ordersAmount").value(1));
 
-        var disbursements = disbursementRepository.findById("wintheiser_bernhard-20221008")
+        var disbursements = disbursementRepository.findById(new DisbursementReference("wintheiser_bernhard-20221008"))
                 .orElseThrow(() -> new RuntimeException("Disbursement not found"));
 
         assertThat(disbursements.getMerchant()).isEqualTo("wintheiser_bernhard");
