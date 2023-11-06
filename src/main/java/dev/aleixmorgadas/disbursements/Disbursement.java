@@ -1,6 +1,5 @@
 package dev.aleixmorgadas.disbursements;
 
-import dev.aleixmorgadas.orders.Order;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -31,11 +30,6 @@ public class Disbursement {
 
     public static Disbursement from(DisbursementReference reference, String merchant, LocalDate date) {
         return new Disbursement(reference, merchant, 0, 0, date, new ArrayList<>(), 0);
-    }
-
-    public void addOrder(Order order) {
-        var disbursementOrder = DisbursementOrder.from(order, this.reference);
-        addOrder(disbursementOrder);
     }
 
     public void addOrder(DisbursementOrder disbursementOrder) {
