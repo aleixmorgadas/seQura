@@ -34,8 +34,7 @@ public class DisbursementService {
             merchants.forEach(merchant -> {
                 var previousMonthBeginning = localDate.minusMonths(1);
                 var previousMonthEnd = localDate.minusMonths(1).with(lastDayOfMonth());
-                var previousMonthDisbursements = disbursementRepository.findByMerchantAndDateBetween(merchant.getReference(), previousMonthBeginning, previousMonthEnd);
-                double sumFees = previousMonthDisbursements.stream().map(Disbursement::getFees).reduce(0.0, Double::sum);
+                double sumFees = disbursementRepository.sumFeesByMerchantAndDateBetween(merchant.getReference(), previousMonthBeginning, previousMonthEnd);
                 if (sumFees < merchant.getMinimumMonthlyFee()) {
                     minimumMonthlyFeeRepository.save(new MinimumMonthlyFee(
                             DisbursementReference.from(merchant, localDate),
