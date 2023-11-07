@@ -32,6 +32,9 @@ public class DisbursementService {
         var merchants = merchantRepository.findAll();
         if (localDate.getDayOfMonth() == 1) {
             merchants.forEach(merchant -> {
+                if (localDate.isBefore(LocalDate.parse(merchant.getLiveOn()))) {
+                    return;
+                }
                 var previousMonthBeginning = localDate.minusMonths(1);
                 var previousMonthEnd = localDate.minusMonths(1).with(lastDayOfMonth());
                 double sumFees = disbursementRepository.sumFeesByMerchantAndDateBetween(merchant.getReference(), previousMonthBeginning, previousMonthEnd);

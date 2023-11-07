@@ -161,4 +161,16 @@ class DisbursementServiceTest extends AbstractIntegrationTest {
         var reference = DisbursementReference.from(merchant, LocalDate.parse(firstMonthDay));
         assertThat(minimumMonthlyFeeRepository.findById(reference)).isEmpty();
     }
+
+    @Test
+    void shouldNotApplyTheMinimumMonthlyFeeBeforeTheMerchantSignedUp() {
+        var merchant = new Merchant("new_merchant", "new@example.com", "2023-10-05", "DAILY", 25);
+        merchantRepository.save(merchant);
+
+        var firstDateOfAPreviousMonth = "2023-09-01";
+        disbursementService.performDisbursementsOn(firstDateOfAPreviousMonth);
+
+        var reference = DisbursementReference.from(merchant, LocalDate.parse(firstDateOfAPreviousMonth));
+        assertThat(minimumMonthlyFeeRepository.findById(reference)).isEmpty();
+    }
 }
