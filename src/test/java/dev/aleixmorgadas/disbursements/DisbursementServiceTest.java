@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
@@ -110,6 +111,7 @@ class DisbursementServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Transactional
     void calculatesMinimumCommissionOnTheFirstDayOfTheMonthWhenNoOrdersTookPlace() {
         var merchant = new Merchant("not_much_traffic", "notraffic@example.com", "2023-10-25", "DAILY", 25.0);
         merchantRepository.save(merchant);
@@ -125,6 +127,7 @@ class DisbursementServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Transactional(propagation = Propagation.NEVER)
     void calculatesTheMinimumFeeOfTheMonthWhenTheMerchantHadOrdersButDidNotReachTheMinimum() {
         var merchant = new Merchant("not_much_traffic", "notraffic@example.com", "2023-10-25", "DAILY", 25.0);
         merchantRepository.save(merchant);
@@ -145,6 +148,7 @@ class DisbursementServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Transactional(propagation = Propagation.NEVER)
     void noMinimumMonthlyFeeWhenTheMerchantAlreadyPaidTheMinimumWithTheOrdersFees() {
         var monthlyFee = 2.0;
         var merchant = new Merchant("much_a_lot_of_traffic", "notraffic@example.com", "2023-10-25", "DAILY", monthlyFee);
@@ -163,6 +167,7 @@ class DisbursementServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Transactional
     void shouldNotApplyTheMinimumMonthlyFeeBeforeTheMerchantSignedUp() {
         var merchant = new Merchant("new_merchant", "new@example.com", "2023-10-05", "DAILY", 25);
         merchantRepository.save(merchant);
