@@ -14,32 +14,48 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.time.temporal.TemporalAdjusters.lastDayOfMonth;
+
 @Service
 @AllArgsConstructor
 public class DisbursementService {
     private final DisbursementRepository disbursementRepository;
     private final DisbursementOrderRepository disbursementOrderRepository;
     private final MerchantRepository merchantRepository;
+    private final MinimumMonthlyFeeRepository minimumMonthlyFeeRepository;
     public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     public List<Disbursement> performDisbursementsOn(String date) {
         var localDate = LocalDate.parse(date, DATE_FORMATTER);
         var disbursements = new ArrayList<Disbursement>();
 
-        merchantRepository.findAll()
-                .stream()
-                .filter(merchant -> merchant.isDisbursementDate(localDate))
-                .forEach(merchant -> {
-                    var disbursementReference = DisbursementReference.from(merchant, localDate);
-                    var disbursement = disbursementRepository.findById(disbursementReference).orElseGet(() -> {
-                        var orders = disbursementOrderRepository.findByReference(disbursementReference);
-                        var d = Disbursement.from(disbursementReference, merchant.getReference(), localDate);
-                        d.addOrders(orders);
-                        disbursementRepository.save(d);
-                        return d;
-                    });
-                    disbursements.add(disbursement);
-                });
+        var merchants = merchantRepository.findAll();
+        if (localDate.getDayOfMonth() == 1) {
+            merchants.forEach(merchant -> {
+                var previousMonthBeginning = localDate.minusMonths(1);
+                var previousMonthEnd = localDate.minusMonths(1).with(lastDayOfMonth());
+                var previousMonthDisbursements = disbursementRepository.findByMerchantAndDateBetween(merchant.getReference(), previousMonthBeginning, previousMonthEnd);
+                double sumFees = previousMonthDisbursements.stream().map(Disbursement::getFees).reduce(0.0, Double::sum);
+                if (sumFees < merchant.getMinimumMonthlyFee()) {
+                    minimumMonthlyFeeRepository.save(new MinimumMonthlyFee(
+                            DisbursementReference.from(merchant, localDate),
+                            merchant.getMinimumMonthlyFee() - sumFees,
+                            localDate
+                    ));
+                }
+            });
+        }
+        merchants.stream().filter(merchant -> merchant.isDisbursementDate(localDate)).forEach(merchant -> {
+            var disbursementReference = DisbursementReference.from(merchant, localDate);
+            var disbursement = disbursementRepository.findById(disbursementReference).orElseGet(() -> {
+                var orders = disbursementOrderRepository.findByReference(disbursementReference);
+                var d = Disbursement.from(disbursementReference, merchant.getReference(), localDate);
+                d.addOrders(orders);
+                disbursementRepository.save(d);
+                return d;
+            });
+            disbursements.add(disbursement);
+        });
         return disbursements;
     }
 
@@ -51,8 +67,7 @@ public class DisbursementService {
 
         var earliestOrderDate = orders.stream().map(Order::getCreatedAt).min(LocalDate::compareTo).orElseThrow();
         var latestOrderDate = orders.stream().map(Order::getCreatedAt).max(LocalDate::compareTo).orElseThrow();
-        earliestOrderDate.datesUntil(latestOrderDate.plusDays(2))
-                .forEach(date -> performDisbursementsOn(date.format(DATE_FORMATTER)));
+        earliestOrderDate.datesUntil(latestOrderDate.plusDays(2)).forEach(date -> performDisbursementsOn(date.format(DATE_FORMATTER)));
     }
 
     @Async
@@ -63,8 +78,7 @@ public class DisbursementService {
     }
 
     private void storeOrder(Order order) {
-        var merchant = merchantRepository.findById(order.getMerchantReference())
-                .orElseThrow(() -> new RuntimeException("Merchant not found"));
+        var merchant = merchantRepository.findById(order.getMerchantReference()).orElseThrow(() -> new RuntimeException("Merchant not found"));
         var reference = DisbursementReference.from(merchant, order);
         var disbursementOrder = DisbursementOrder.from(order, reference);
         disbursementOrderRepository.save(disbursementOrder);

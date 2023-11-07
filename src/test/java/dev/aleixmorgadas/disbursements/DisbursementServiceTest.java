@@ -35,6 +35,8 @@ class DisbursementServiceTest extends AbstractIntegrationTest {
     private MerchantRepository merchantRepository;
     @Autowired
     private DisbursementService disbursementService;
+    @Autowired
+    private MinimumMonthlyFeeRepository minimumMonthlyFeeRepository;
 
     private final String DAILY_MERCHANT = "daily_merchant";
     private final String WEEKLY_MERCHANT = "weekly_merchant";
@@ -52,6 +54,7 @@ class DisbursementServiceTest extends AbstractIntegrationTest {
         merchantRepository.deleteAll();
         disbursementOrderRepository.deleteAll();
         disbursementRepository.deleteAll();
+        minimumMonthlyFeeRepository.deleteAll();
     }
 
     @Test
@@ -104,5 +107,58 @@ class DisbursementServiceTest extends AbstractIntegrationTest {
 
         var idempotentDisbursements = disbursementService.performDisbursementsOn("2023-11-08");
         assertThat(idempotentDisbursements.get(1).getOrders()).hasSize(1);
+    }
+
+    @Test
+    void calculatesMinimumCommissionOnTheFirstDayOfTheMonthWhenNoOrdersTookPlace() {
+        var merchant = new Merchant("not_much_traffic", "notraffic@example.com", "2023-10-25", "DAILY", 25.0);
+        merchantRepository.save(merchant);
+
+        var firstMonthDay = "2023-11-01";
+        disbursementService.performDisbursementsOn(firstMonthDay);
+
+        var reference = DisbursementReference.from(merchant, LocalDate.parse(firstMonthDay));
+        var minimumMonthlyFee = minimumMonthlyFeeRepository.findById(reference)
+                .orElseThrow(() -> new IllegalArgumentException("no minimumMonthlyFee found"));
+        assertThat(minimumMonthlyFee.amount).isEqualTo(25.0);
+        assertThat(minimumMonthlyFee.month).isEqualTo(LocalDate.parse(firstMonthDay));
+    }
+
+    @Test
+    void calculatesTheMinimumFeeOfTheMonthWhenTheMerchantHadOrdersButDidNotReachTheMinimum() {
+        var merchant = new Merchant("not_much_traffic", "notraffic@example.com", "2023-10-25", "DAILY", 25.0);
+        merchantRepository.save(merchant);
+        disbursementService.onOrderPlaced(new OrderPlaced(
+                new Order(1L, "not_much_traffic", "25", LocalDate.parse("2023-10-28")),
+                LocalDate.parse("2023-10-28")
+        ));
+        disbursementService.performDisbursementsOn("2023-10-29");
+
+        var firstMonthDay = "2023-11-01";
+        disbursementService.performDisbursementsOn(firstMonthDay);
+
+        var reference = DisbursementReference.from(merchant, LocalDate.parse(firstMonthDay));
+        var minimumMonthlyFee = minimumMonthlyFeeRepository.findById(reference)
+                .orElseThrow(() -> new IllegalArgumentException("no minimumMonthlyFee found"));
+        assertThat(minimumMonthlyFee.amount).isEqualTo(24.75);
+        assertThat(minimumMonthlyFee.month).isEqualTo(LocalDate.parse(firstMonthDay));
+    }
+
+    @Test
+    void noMinimumMonthlyFeeWhenTheMerchantAlreadyPaidTheMinimumWithTheOrdersFees() {
+        var monthlyFee = 2.0;
+        var merchant = new Merchant("much_a_lot_of_traffic", "notraffic@example.com", "2023-10-25", "DAILY", monthlyFee);
+        merchantRepository.save(merchant);
+        disbursementService.onOrderPlaced(new OrderPlaced(
+                new Order(1L, "much_a_lot_of_traffic", "2500", LocalDate.parse("2023-10-28")),
+                LocalDate.parse("2023-10-28")
+        ));
+        disbursementService.performDisbursementsOn("2023-10-29");
+
+        var firstMonthDay = "2023-11-01";
+        disbursementService.performDisbursementsOn(firstMonthDay);
+
+        var reference = DisbursementReference.from(merchant, LocalDate.parse(firstMonthDay));
+        assertThat(minimumMonthlyFeeRepository.findById(reference)).isEmpty();
     }
 }
