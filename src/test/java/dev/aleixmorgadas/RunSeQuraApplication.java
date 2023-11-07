@@ -35,7 +35,7 @@ public class RunSeQuraApplication {
         postgres.withNetworkAliases("stateful-postgres");
         postgres.setPortBindings(List.of("5555:5432"));
         postgres.withFileSystemBind("./.data/postgres", "/var/lib/postgresql/data");
-        postgres.waitingFor(Wait.forListeningPort());
+        postgres.waitingFor(Wait.forSuccessfulCommand("psql -U test -c 'SELECT 1;'"));
         return postgres;
     }
 
