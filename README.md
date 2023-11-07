@@ -39,6 +39,12 @@ This will start the application with a Postgres Container automatically on a ran
 
 It requires to be stateful application in order to use Metabase.
 
+## Running the tests in local
+
+`./gradlew test`
+
+It will start the postgres automatically and shut it down when the test suite finishes using Testcontainers.
+
 ### Postgres' connection information:
 
 - Port: See `docker ps` - In case of stateless, the port will be random. In case of stateful, it will be `5555`.
