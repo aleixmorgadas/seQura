@@ -5,6 +5,7 @@ import dev.aleixmorgadas.orders.Order;
 import dev.aleixmorgadas.orders.OrderIngestedEvent;
 import dev.aleixmorgadas.orders.OrderPlaced;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import java.util.List;
 
 import static java.time.temporal.TemporalAdjusters.lastDayOfMonth;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class DisbursementService {
@@ -64,12 +66,16 @@ public class DisbursementService {
     @Async
     @EventListener
     void onOrderIngested(OrderIngestedEvent event) {
+        log.info("orderIngestedEvent received");
         var orders = event.orders();
+        log.info("storing orders as DisbursementOrders");
         orders.forEach(this::storeOrder);
 
         var earliestOrderDate = orders.stream().map(Order::getCreatedAt).min(LocalDate::compareTo).orElseThrow();
         var latestOrderDate = orders.stream().map(Order::getCreatedAt).max(LocalDate::compareTo).orElseThrow();
+        log.info("Performing disbursements from {} until {}", earliestOrderDate, latestOrderDate);
         earliestOrderDate.datesUntil(latestOrderDate.plusDays(2)).forEach(date -> performDisbursementsOn(date.format(DATE_FORMATTER)));
+        log.info("Performing disbursements completed");
     }
 
     @Async

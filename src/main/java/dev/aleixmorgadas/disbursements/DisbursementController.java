@@ -2,12 +2,11 @@ package dev.aleixmorgadas.disbursements;
 
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.text.DecimalFormat;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @RestController
@@ -15,6 +14,7 @@ import java.util.List;
 public class DisbursementController {
     public static final String URI = "/disbursements";
     private final DisbursementService disbursementService;
+    private final DisbursementRepository disbursementRepository;
 
     @PostMapping("/{date}")
     public ResponseEntity<List<DisbursementResponse>> performDisbursements(
@@ -22,6 +22,21 @@ public class DisbursementController {
     ) {
         var disbursements = disbursementService.performDisbursementsOn(date);
         return ResponseEntity.ok(disbursements.stream().map(DisbursementResponse::from).toList());
+    }
+
+    @GetMapping("/by-year")
+    public ResponseEntity<List<DisbursementYearReport>> byYear() {
+        var df = new DecimalFormat("#");
+        df.setMaximumFractionDigits(2);
+        var byYearDisbursementReport = disbursementRepository.byYearDisbursementReport()
+                .stream().map(disbursementReport -> new DisbursementYearReport(
+                        disbursementReport.getYear().toString(),
+                        disbursementReport.getDisbursements(),
+                        df.format(disbursementReport.getAmount()),
+                        df.format(disbursementReport.getFees())
+                ))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(byYearDisbursementReport);
     }
 
     public record DisbursementResponse(
@@ -43,4 +58,11 @@ public class DisbursementController {
             );
         }
     }
+
+    public record DisbursementYearReport(
+            String year,
+            long disbursements,
+            String amount,
+            String fees
+    ) {}
 }
