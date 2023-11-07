@@ -1,17 +1,24 @@
 package dev.aleixmorgadas;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.Network;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.wait.strategy.HostPortWaitStrategy;
 import org.testcontainers.utility.DockerImageName;
 
 import java.util.List;
 
+@Slf4j
 @TestConfiguration(proxyBeanMethods = false)
 public class RunSeQuraApplication {
+    Network network = Network.newNetwork();
 
     @Bean
     @ServiceConnection
@@ -24,15 +31,31 @@ public class RunSeQuraApplication {
     @ServiceConnection
     @ConditionalOnProperty(value = "stateful", havingValue = "true")
     PostgreSQLContainer<?> postgresStatefulContainer() {
-        var postgres = new PostgreSQLContainer<>(DockerImageName.parse("postgres:16.0"))
-                .withReuse(true);
+        var postgres = new PostgreSQLContainer<>(DockerImageName.parse("postgres:16.0"));
+        postgres.withNetwork(network);
+        postgres.withNetworkAliases("stateful-postgres");
         postgres.setPortBindings(List.of("5555:5432"));
         postgres.withFileSystemBind("./.data/postgres", "/var/lib/postgresql/data");
+        postgres.waitingFor(new HostPortWaitStrategy());
         return postgres;
+    }
+
+    @Bean
+    @ConditionalOnProperty(value = "metabase", havingValue = "true")
+    GenericContainer<?> metabaseContainer() {
+        var metabase = new GenericContainer<>(DockerImageName.parse("metabase/metabase"));
+        metabase.withNetwork(network);
+        metabase.setPortBindings(List.of("3000:3000"));
+        metabase.withFileSystemBind("./.data/metabase/", "/metabase.db/");
+        return metabase;
     }
 
     public static void main(String[] args) {
         SpringApplication.from(SeQuraApplication::main).with(RunSeQuraApplication.class).run(args);
     }
 
+    @Bean
+    ApplicationRunner onApplicationStarts(GenericContainer<?> metabaseContainer) {
+        return args -> log.info("host {}", metabaseContainer.getHost());
+    }
 }
