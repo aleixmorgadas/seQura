@@ -127,10 +127,10 @@ class DisbursementServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Transactional(propagation = Propagation.NEVER)
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     void calculatesTheMinimumFeeOfTheMonthWhenTheMerchantHadOrdersButDidNotReachTheMinimum() {
         var merchant = new Merchant("not_much_traffic", "notraffic@example.com", "2023-10-25", "DAILY", 25.0);
-        merchantRepository.save(merchant);
+        merchantRepository.saveAndFlush(merchant);
         disbursementService.onOrderPlaced(new OrderPlaced(
                 new Order(1L, "not_much_traffic", "25", LocalDate.parse("2023-10-28")),
                 LocalDate.parse("2023-10-28")
@@ -148,11 +148,11 @@ class DisbursementServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Transactional(propagation = Propagation.NEVER)
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     void noMinimumMonthlyFeeWhenTheMerchantAlreadyPaidTheMinimumWithTheOrdersFees() {
         var monthlyFee = 2.0;
         var merchant = new Merchant("much_a_lot_of_traffic", "notraffic@example.com", "2023-10-25", "DAILY", monthlyFee);
-        merchantRepository.save(merchant);
+        merchantRepository.saveAndFlush(merchant);
         disbursementService.onOrderPlaced(new OrderPlaced(
                 new Order(1L, "much_a_lot_of_traffic", "2500", LocalDate.parse("2023-10-28")),
                 LocalDate.parse("2023-10-28")

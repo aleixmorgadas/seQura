@@ -86,7 +86,8 @@ public class DisbursementService {
     }
 
     private void storeOrder(Order order) {
-        var merchant = merchantRepository.findById(order.getMerchantReference()).orElseThrow(() -> new RuntimeException("Merchant not found"));
+        var merchant = merchantRepository.findById(order.getMerchantReference())
+                .orElseThrow(() -> new RuntimeException("Merchant not found with reference %s".formatted(order.getMerchantReference())));
         var reference = DisbursementReference.from(merchant, order);
         var disbursementOrder = DisbursementOrder.from(order, reference);
         disbursementOrderRepository.save(disbursementOrder);
