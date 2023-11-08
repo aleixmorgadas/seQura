@@ -16,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -30,6 +32,8 @@ public class DisbursementControllerTest extends AbstractIntegrationTest {
     private OrderService orderService;
     @Autowired
     private OrderRepository orderRepository;
+    @Autowired
+    private DisbursementService disbursementService;
 
     @BeforeAll
     void setup() {
@@ -79,5 +83,19 @@ public class DisbursementControllerTest extends AbstractIntegrationTest {
         assertThat(disbursements.getOrders().get(0).getAmount()).isEqualTo(25.43);
         assertThat(disbursements.getOrders().get(0).getCommission()).isEqualTo(0.26);
         assertThat(disbursements.getOrders().get(0).getCreatedAt()).isEqualTo("2022-10-07");
+    }
+
+    @Test
+    void yearReport() throws Exception {
+        disbursementService.performDisbursementsOn("2022-10-08");
+
+        mockMvc.perform(get(DisbursementController.URI + "/by-year"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].year").value("2022"))
+                .andExpect(jsonPath("$[0].disbursements").value(1))
+                .andExpect(jsonPath("$[0].amount").value(25.17))
+                .andExpect(jsonPath("$[0].fees").value(0.26));
+
     }
 }

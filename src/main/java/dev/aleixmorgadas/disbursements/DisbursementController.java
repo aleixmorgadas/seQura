@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.DecimalFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,7 +31,7 @@ public class DisbursementController {
         df.setMaximumFractionDigits(2);
         var byYearDisbursementReport = disbursementRepository.byYearDisbursementReport()
                 .stream().map(disbursementReport -> new DisbursementYearReport(
-                        disbursementReport.getYear().toString(),
+                        disbursementReport.getYear().format(DateTimeFormatter.ofPattern("yyyy")),
                         disbursementReport.getDisbursements(),
                         df.format(disbursementReport.getAmount()),
                         df.format(disbursementReport.getFees())
